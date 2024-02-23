@@ -2,7 +2,7 @@ const http = require("http")
 const fs = require('fs')
 
 
-const data = fs.readFileSync(`${__dirname}/data.json`)
+const data = fs.readFileSync(`${__dirname}/data/data.json`)
 const dataObject = JSON.parse(data)
 
 const server = http.createServer((req, res) => {
@@ -12,6 +12,7 @@ const server = http.createServer((req, res) => {
     let contentType
 
     switch(pathName){
+        // overview 
         case "/":
             message = "See Everything In One View"
             contentType="text/html"
@@ -24,16 +25,20 @@ const server = http.createServer((req, res) => {
             statusCode = 200
             break;
 
+        //products
         case "/products":
             message = "What would you want to buy? :)"
             contentType="text/html"
             statusCode = 200
             break;
 
+        // api
         case "/api":
             statusCode = 200
             contentType = "application/json"
             console.log(dataObject)
+        
+        // not-found
         default:
             message = "Oops Page Not Found!"
             statusCode = 404;
