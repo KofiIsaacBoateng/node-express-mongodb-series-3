@@ -155,14 +155,13 @@ const deleteTour = (req, res) => {
 }
 
 /** routes */
-app.get("/api/v1/tours", getAllTours) // get all tours
-app.get("/api/v1/tours/:id", getTour) // get tour
-app.post("/api/v1/tours", createTour) // create tour
-app.patch("/api/v1/tours/:id", updateTour) // update tour
-app.delete("/api/v1/tours/:id", deleteTour) // delete tour
+app.route("/api/v1/tours")
+    .get(getAllTours)
+    .post(createTour)
 
-
-
-
+app.route("/api/v1/tours/:id")
+    .get(getTour)
+    .patch(updateTour)
+    .delete(deleteTour)
 
 app.listen(PORT, () => console.log(`Server is listening on port: ${PORT}`))
