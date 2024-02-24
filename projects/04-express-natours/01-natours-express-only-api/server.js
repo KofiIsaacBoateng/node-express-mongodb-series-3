@@ -21,16 +21,16 @@ const tours = JSON.parse(
 /** API */
 
 // get all tours
-app.get("/api/v1/tours", (req, res) => {
+const getAllTours = (req, res) => {
     res.status(200).json({
         success: true,
         results: tours.length,
         data: tours
     })
-})
+}
 
 // get tour 
-app.get("/api/v1/tours/:id", (req, res) => {
+const getTour = (req, res) => {
     const { id } = req.params
     
     const tour = tours.find(data => data.id === id * 1)
@@ -48,11 +48,11 @@ app.get("/api/v1/tours/:id", (req, res) => {
         data: tour
     })
 
-})
+}
 
 
 // create tour
-app.post("/api/v1/tours", (req, res) => {
+const createTour = (req, res) => {
     console.log(req.body)
 
     if(!req.body){
@@ -76,11 +76,11 @@ app.post("/api/v1/tours", (req, res) => {
             })
         }
     )
-})
+}
 
 
 // update a tour 
-app.patch("/api/v1/tours/:id", (req, res) => {
+const updateTour = (req, res) => {
     const {id} = req.params
     const body = req.body
 
@@ -112,22 +112,20 @@ app.patch("/api/v1/tours/:id", (req, res) => {
 
     const sortedUpdatedTour = updatedTours.sort((a, b) => a.id - b.id)
 
-    fs.writeFileSync(
+    fs.writeFile(
         simpleToursPath,
         JSON.stringify(sortedUpdatedTour),
         (err) => {
             res.status(200).json({
                 success: true,
-                data: updatedTour
+                data: sortedUpdatedTour
             })
         }
     )
     
-})
+}
 
-
-// delete tour 
-app.delete("/api/v1/tours/:id", (req, res) => {
+const deleteTour = (req, res) => {
     const {id} = req.params
 
     const tour = tours.find(data => data.id === id * 1)
@@ -143,11 +141,26 @@ app.delete("/api/v1/tours/:id", (req, res) => {
 
     const sortedUpdatedTour = notTour.sort((a, b) => a.id - b.id)
 
-    fs.writeFileSync(
+    fs.writeFile(
         simpleToursPath,
-        JSON.stringify(sortedUpdatedTour)
+        JSON.stringify(sortedUpdatedTour),
+        (err) => {
+            res.status(200).json({
+                success: true,
+                data: updatedTour
+            })
+        }
     )
-})
+    
+}
+
+/** routes */
+app.get("/api/v1/tours", getAllTours) // get all tours
+app.get("/api/v1/tours/:id", getTour) // get tour
+app.post("/api/v1/tours", createTour) // create tour
+app.patch("/api/v1/tours/:id", updateTour) // update tour
+app.delete("/api/v1/tours/:id", deleteTour) // delete tour
+
 
 
 
