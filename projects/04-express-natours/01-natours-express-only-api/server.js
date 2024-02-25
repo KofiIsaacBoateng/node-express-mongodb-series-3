@@ -13,12 +13,13 @@ app.use(express.json())
 // read data from ../dev-data/data/tours-simple.json
 const simpleToursPath = path.join(__dirname, "..", "dev-data", "data", "tours-simple.json") // simple data
 const toursPath = path.join(__dirname, "..", "dev-data", "data", "tours-simple.json") // robust data with a lot more fields
+const users = path.join(__dirname, "..", "dev-data", "data", "users.json") // robust data with a lot more fields
 
 const tours = JSON.parse(
     fs.readFileSync(simpleToursPath)
 )
 
-/** API */
+/** API - TOURS */
 
 // get all tours
 const getAllTours = (req, res) => {
@@ -154,7 +155,49 @@ const deleteTour = (req, res) => {
     
 }
 
-/** routes */
+
+
+/****   API - USERS   ***/
+// get all users 
+const getAllUsers = (req, res) => {
+    res.status(500).json({
+        success: false,
+        msg: "Sorry! route not defined yet"
+    })
+}
+
+const getUser = (req, res) => {
+    res.status(500).json({
+        success: false,
+        msg: "Sorry! route not defined yet"
+    })
+}
+
+const createUser = (req, res) => {
+    res.status(500).json({
+        success: false,
+        msg: "Sorry! route not defined yet"
+    })
+}
+
+const updateUser = (req, res) => {
+    res.status(500).json({
+        success: false,
+        msg: "Sorry! route not defined yet"
+    })
+}
+
+const deleteUser = (req, res) => {
+    res.status(500).json({
+        success: false,
+        msg: "Sorry! route not defined yet"
+    })
+}
+
+
+
+
+/** routes - tours */
 app.route("/api/v1/tours")
     .get(getAllTours)
     .post(createTour)
@@ -163,5 +206,20 @@ app.route("/api/v1/tours/:id")
     .get(getTour)
     .patch(updateTour)
     .delete(deleteTour)
+
+
+/** routes - users */
+app.route("/api/v1/users")
+    .get(getAllUsers)
+    .post(createUser)
+
+app.route("/api/v1/users/:id")
+    .get(getUser)
+    .patch(updateUser)
+    .delete(deleteUser)
+
+
+
+
 
 app.listen(PORT, () => console.log(`Server is listening on port: ${PORT}`))
