@@ -3,7 +3,7 @@ const fs = require("fs")
 const path = require("path")
 
 const app = express()
-const PORT = process.env.PORT || 3500
+const PORT = process.env.PORT || 3000
 
 
 
@@ -158,6 +158,7 @@ const deleteTour = (req, res) => {
 
 
 /****   API - USERS   ***/
+
 // get all users 
 const getAllUsers = (req, res) => {
     res.status(500).json({
@@ -197,26 +198,55 @@ const deleteUser = (req, res) => {
 
 
 
-/** routes - tours */
-app.route("/api/v1/tours")
+
+{/**** RECOMMENDED over second option */}
+const tourRouter = express.Router()
+const userRouter = express.Router()
+
+/*** recommended routes - tours */
+tourRouter.route("/")
     .get(getAllTours)
     .post(createTour)
 
-app.route("/api/v1/tours/:id")
+tourRouter.route("/:id")
     .get(getTour)
-    .patch(updateTour)
+    .patch(updateTour) 
     .delete(deleteTour)
 
 
-/** routes - users */
-app.route("/api/v1/users")
+/** good not bad routes - tours */
+    // app.route("/api/v1/tours")
+    //     .get(getAllTours)
+    //     .post(createTour)
+
+    // app.route("/api/v1/tours/:id")
+    //     .get(getTour)
+    //     .patch(updateTour)
+    //     .delete(deleteTour)
+
+
+
+/**** recommended routes - users */
+userRouter.route("/")
     .get(getAllUsers)
     .post(createUser)
 
-app.route("/api/v1/users/:id")
+
+userRouter.route("/:id")
     .get(getUser)
     .patch(updateUser)
     .delete(deleteUser)
+
+
+/** good but not bad routes - users */
+    // app.route("/api/v1/users")
+    //     .get(getAllUsers)
+    //     .post(createUser)
+
+    // app.route("/api/v1/users/:id")
+    //     .get(getUser)
+    //     .patch(updateUser)
+    //     .delete(deleteUser)
 
 
 
