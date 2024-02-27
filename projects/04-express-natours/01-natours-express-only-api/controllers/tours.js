@@ -13,8 +13,22 @@ const tours = JSON.parse(
 )
 
 
+module.exports.checkID = (req, res, next, val) => {
+    const tour = tours.find(data => data.id === val * 1)
+
+    if(!tour){
+        return res.status(404).json({
+            success: false,
+            msg: `tour with id: ${val} not found`
+        })
+    }
+
+    next()
+}
+
+
 // get all tours
-const getAllTours = (req, res) => {
+module.exports.getAllTours = (req, res) => {
     res.status(200).json({
         success: true,
         results: tours.length,
@@ -23,18 +37,10 @@ const getAllTours = (req, res) => {
 }
 
 // get tour 
-const getTour = (req, res) => {
+module.exports.getTour = (req, res) => {
     const { id } = req.params
     
     const tour = tours.find(data => data.id === id * 1)
-
-    if(!tour){
-        res.status(404).json({
-            success: false,
-            msg: `Tour with id: ${id} not found.`
-        })
-    }
-
 
     res.status(200).json({
         success: true,
@@ -45,9 +51,7 @@ const getTour = (req, res) => {
 
 
 // create tour
-const createTour = (req, res) => {
-    console.log(req.body)
-
+module.exports.createTour = (req, res) => {
     if(!req.body){
         res.status(400).json({
             success: false,
@@ -73,7 +77,7 @@ const createTour = (req, res) => {
 
 
 // update a tour 
-const updateTour = (req, res) => {
+module.exports.updateTour = (req, res) => {
     const {id} = req.params
     const body = req.body
 
@@ -85,13 +89,6 @@ const updateTour = (req, res) => {
     }
 
     const tour = tours.find(data => data.id === id * 1)
-
-    if(!tour){
-        res.status(404).json({
-            success: false,
-            msg: `tour with id: ${id} not found`
-        })
-    }
 
     const notTour = tours.filter(data => data.id !== id * 1)
     const updatedTour = {
@@ -119,17 +116,8 @@ const updateTour = (req, res) => {
 }
 
 
-const deleteTour = (req, res) => {
+module.exports.deleteTour = (req, res) => {
     const {id} = req.params
-
-    const tour = tours.find(data => data.id === id * 1)
-
-    if(!tour){
-        res.status(404).json({
-            success: false,
-            msg: `tour already deleted`
-        })
-    }
 
     const notTour = tours.filter(data => data.id !== id * 1)
 
@@ -146,14 +134,4 @@ const deleteTour = (req, res) => {
         }
     )
     
-}
-
-
-
-module.exports = {
-    getAllTours,
-    getTour,
-    createTour,
-    updateTour,
-    deleteTour
 }
