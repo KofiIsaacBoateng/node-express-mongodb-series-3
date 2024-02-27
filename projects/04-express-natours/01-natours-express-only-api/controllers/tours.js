@@ -27,6 +27,20 @@ module.exports.checkID = (req, res, next, val) => {
 }
 
 
+module.exports.checkBody = (req, res, next) => {
+    const {name, price} = req.body
+
+    if(!name || !price){
+        return res.status(400).json({
+            success: false,
+            msg: `name and price of tour cannot be undefined!`
+        })
+    }
+
+    next()
+} 
+
+
 // get all tours
 module.exports.getAllTours = (req, res) => {
     res.status(200).json({
@@ -63,7 +77,7 @@ module.exports.createTour = (req, res) => {
     const newTour = Object.assign({id: newTourId}, req.body)
     tours.push(newTour)
 
-    fs.writeFileSync(
+    fs.writeFile(
         simpleToursPath,
         JSON.stringify(tours),
         err => {
