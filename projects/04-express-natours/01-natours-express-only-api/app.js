@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 3000
 
 /** middlewares */
 app.use(express.json())
+app.use(express.static(path.join(__dirname, "..", "public")))
 
 /*** routes */
 app.use("/api/v1/users", userRoutes)
