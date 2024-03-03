@@ -3,10 +3,33 @@ const Tour = require("../models/tours");
 
 // get all tours
 module.exports.getAllTours = async (req, res) => {
-  const queryObject = req.query;
-  console.log(queryObject);
   try {
-    const tours = await Tour.find();
+    const queryObject = { ...req.query };
+    const eQueryFields = ["page", "limit", "sort", "fields"];
+    eQueryFields.forEach((query) => delete queryObject[query]);
+
+    let queryString = JSON.stringify(queryObject);
+    queryString = queryString.replace(
+      /\b(gt|lt|gte|lte|eq|ne)\b/g,
+      (match) => `$${match}`
+    );
+
+    const restoredQuery = JSON.parse(queryString, (key, value) => {
+      const isTypeNumber =
+        key === "ratingsAverage" ||
+        key === "ratingsQuantity" ||
+        key === "price" ||
+        key === "priceDiscount";
+      if (isTypeNumber && typeof value !== "object") return Number(value);
+      else if (isTypeNumber && typeof value === "object") {
+        const keys = Object.keys(value);
+        return { [keys[0]]: Number(value[keys[0]]) };
+      } else return value;
+    });
+
+    let query = Tour.find(restoredQuery);
+
+    const tours = await query;
 
     res.status(200).json({
       success: true,
@@ -14,7 +37,7 @@ module.exports.getAllTours = async (req, res) => {
       data: tours,
     });
   } catch (error) {
-    res.status(404).json({
+    res.status(400).json({
       success: false,
       msg: error,
     });
