@@ -8,6 +8,7 @@ module.exports.getAllTours = async (req, res) => {
     const eQueryFields = ["page", "limit", "sort", "fields"];
     eQueryFields.forEach((query) => delete queryObject[query]);
 
+    /** FILTERING */
     let queryString = JSON.stringify(queryObject);
     queryString = queryString.replace(
       /\b(gt|lt|gte|lte|eq|ne)\b/g,
@@ -26,8 +27,16 @@ module.exports.getAllTours = async (req, res) => {
         return { [keys[0]]: Number(value[keys[0]]) };
       } else return value;
     });
-
+    console.log(restoredQuery);
     let query = Tour.find(restoredQuery);
+
+    /** SORTING */
+    if (req.query.sort) {
+      const sortQuery = req.query.sort;
+      query = query.sort(sortQuery.split(",").join(" "));
+    } else {
+      query = query.sort("-createdAt");
+    }
 
     const tours = await query;
 
