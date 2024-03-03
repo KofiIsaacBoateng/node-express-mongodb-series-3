@@ -3,6 +3,8 @@ const Tour = require("../models/tours");
 
 // get all tours
 module.exports.getAllTours = async (req, res) => {
+  const queryObject = req.query;
+  console.log(queryObject);
   try {
     const tours = await Tour.find();
 
@@ -25,12 +27,19 @@ module.exports.getTour = async (req, res) => {
     const { id } = req.params;
     const tour = await Tour.findById(id);
 
+    if (!tour) {
+      res.status(404).json({
+        success: false,
+        msg: "Tour not found!",
+      });
+    }
+
     res.status(200).json({
       success: true,
       data: tour,
     });
   } catch (error) {
-    res.status(200).json({
+    res.status(500).json({
       success: false,
       msg: error,
     });
@@ -57,6 +66,15 @@ module.exports.createTour = async (req, res) => {
 module.exports.updateTour = async (req, res) => {
   try {
     const { id } = req.params;
+
+    const exists = await Tour.findById(id);
+    if (!exists) {
+      res.status(404).json({
+        success: false,
+        msg: "Tour not found!",
+      });
+    }
+
     const tour = await Tour.findByIdAndUpdate(id, req.body, {
       new: true,
       runValidators: true,
@@ -67,7 +85,7 @@ module.exports.updateTour = async (req, res) => {
       data: tour,
     });
   } catch (error) {
-    res.status(400).json({
+    res.status(500).json({
       success: false,
       err: err,
     });
@@ -77,11 +95,20 @@ module.exports.updateTour = async (req, res) => {
 module.exports.deleteTour = async (req, res) => {
   try {
     const { id } = req.params;
-    const tour = await Tour.findByIdAndDelete(id);
+    const tour = await Tour.findById(id);
+
+    if (!tour) {
+      res.status(404).json({
+        success: false,
+        msg: "Tour don't even exist!",
+      });
+    }
+
+    await Tour.findByIdAndDelete(id);
 
     res.status(200).json({
       success: true,
-      data: tour,
+      msg: "Delete success!",
     });
   } catch (error) {
     res.status(400).json({

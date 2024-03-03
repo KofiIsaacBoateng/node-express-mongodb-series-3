@@ -3,7 +3,7 @@ const app = require("./app");
 const { connect, Schema, model } = require("mongoose");
 const port = process.env.PORT;
 
-connect(process.env.MONGO_URI)
+connect(process.env.MONGO_URI_LOCAL)
   .then(() => {
     console.log("Database connected!");
     app.listen(port, () => {

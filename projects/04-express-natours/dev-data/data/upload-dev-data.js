@@ -2,7 +2,7 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 const fs = require("fs");
 const path = require("path");
-const MONGO_URI = process.env.MONGO_URI;
+const MONGO_URI_LOCAL = process.env.MONGO_URI_LOCAL;
 const Tours = require("../../02-natours-express-mongodb-api/models/tours");
 
 const bulkToursData = JSON.parse(
@@ -10,7 +10,7 @@ const bulkToursData = JSON.parse(
 );
 
 mongoose
-  .connect(MONGO_URI)
+  .connect(MONGO_URI_LOCAL)
   .then((con) => {
     console.log("database connection successful!");
   })
