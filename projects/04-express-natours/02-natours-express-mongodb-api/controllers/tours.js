@@ -27,7 +27,7 @@ module.exports.getAllTours = async (req, res) => {
         return { [keys[0]]: Number(value[keys[0]]) };
       } else return value;
     });
-    console.log(restoredQuery);
+
     let query = Tour.find(restoredQuery);
 
     /** SORTING */
@@ -46,6 +46,13 @@ module.exports.getAllTours = async (req, res) => {
       query = query.select("-__v");
     }
 
+    /*** PAGINATION */
+    const page = req.query.page || 1;
+    const limit = req.query.limit || 5;
+    const skip = (page - 1) * limit;
+
+    /**NB::==> make sure to update error handling */
+    query = query.limit(limit).skip(skip);
     const tours = await query;
 
     res.status(200).json({
