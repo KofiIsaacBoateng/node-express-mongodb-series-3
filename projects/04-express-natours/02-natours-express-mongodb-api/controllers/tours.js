@@ -1,7 +1,34 @@
 // read data from ../dev-data/data/tours-simple.json
 const Tour = require("../models/tours");
 
-// get all tours
+/*** ALIASES */
+
+module.exports.top5 = (req, res, next) => {
+  // top 5
+  req.query.limit = 5;
+  req.query.fields = "name,price,ratingsAverage,ratingsQuantity,summary";
+  next();
+};
+
+module.exports.getTop5Rated = (req, res, next) => {
+  // top 5 ratings
+  req.query.sort = "-ratingsAverage,-ratingsQuantity";
+  next();
+};
+
+module.exports.getTop5Cheapest = (req, res, next) => {
+  // top 5 cheapest
+  req.query.sort = "price,-ratingsAverage,-ratingsQuantity";
+  next();
+};
+
+module.exports.getTop5Expensive = (req, res, next) => {
+  // top 5 expensive
+  req.query.sort = "-price,-ratingsAverage,-ratingsQuantity";
+  next();
+};
+
+/*** GET ALL TOURS */
 module.exports.getAllTours = async (req, res) => {
   try {
     const queryObject = { ...req.query };
