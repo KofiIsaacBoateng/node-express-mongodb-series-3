@@ -3,7 +3,48 @@ const Tour = require("../models/tours");
 const API_FEATURES = require("../utils/api-features");
 
 /*** STATISTICS */
-module.exports.getStats = (req, res) => {};
+module.exports.getStats = async (req, res) => {
+  try {
+    const stats = await Tour.aggregate([
+      {
+        $match: {
+          ratingsAverage: { $gte: 4.3 },
+        },
+      },
+      {
+        $group: {
+          _id: { $toUpper: "$difficulty" },
+          numberOfTours: { $sum: 1 },
+          numberOfRatings: { $sum: "$ratingsQuantity" },
+          averageRating: { $avg: "$ratingsAverage" },
+          averagePrice: { $avg: "$price" },
+          minPrice: { $min: "$price" },
+          maxPrice: { $max: "$price" },
+        },
+      },
+
+      {
+        $sort: { averageRating: -1 },
+      },
+
+      // {
+      //   $match: {
+      //     _id: { $ne: "EASY" },
+      //   },
+      // },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: stats,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      msg: error,
+    });
+  }
+};
 
 /*** GET ALL TOURS */
 module.exports.getAllTours = async (req, res) => {
@@ -95,7 +136,7 @@ module.exports.updateTour = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      err: err,
+      err: error,
     });
   }
 };

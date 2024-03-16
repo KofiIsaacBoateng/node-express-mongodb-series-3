@@ -19,7 +19,7 @@ router.get("/top-5-cheapest", top5, getTop5Cheapest, getAllTours);
 router.get("/top-5-expensive", top5, getTop5Expensive, getAllTours);
 
 /*** STATISTICS */
-router.route("/get-stats", getStats);
+router.route("/get-stats").get(getStats);
 
 /*** MAIN ROUTES */
 router.route("/").get(getAllTours).post(createTour);

@@ -20,7 +20,10 @@ const tourSchema = new Schema({
 
   difficulty: {
     type: String,
-    required: [true, "Please state the level of difficulty"],
+    enum: {
+      values: ["medium", "easy", "difficult"],
+      required: [true, "(VALUE) isn't supported"],
+    },
   },
 
   ratingsQuantity: {
