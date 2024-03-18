@@ -15,41 +15,41 @@ module.exports.getAllTours = async (req, res) => {
   } catch (error) {
     res.status(404).json({
       success: false,
-      msg: error.errmsg,
+      msg: error,
     });
   }
 };
 
 // get tour
-module.exports.getTour = (req, res) => {
-  const { id } = req.params;
-
+module.exports.getTour = async (req, res) => {
   try {
-    const tour = Tour.findById(id);
+    const { id } = req.params;
+    const tour = await Tour.findById(id);
 
     res.status(200).json({
       success: true,
       data: tour,
     });
-  } catch (error) {}
-  res.status(200).json({
-    success: true,
-    // data: tour
-  });
+  } catch (error) {
+    res.status(200).json({
+      success: false,
+      msg: error,
+    });
+  }
 };
 
 // create tour
 module.exports.createTour = async (req, res) => {
-  const { name, price } = req.body;
-
-  if (!name || !price) {
-    return res.status(400).json({
-      success: false,
-      msg: `name and price of tour cannot be undefined!`,
-    });
-  }
-
   try {
+    const { name, price } = req.body;
+
+    if (!name || !price) {
+      res.status(400).json({
+        success: false,
+        msg: `name and price of tour cannot be undefined!`,
+      });
+    }
+
     const tour = await Tour.create(req.body);
 
     res.status(201).json({
@@ -66,22 +66,47 @@ module.exports.createTour = async (req, res) => {
 
 // update a tour
 module.exports.updateTour = async (req, res) => {
-  const { id } = req.params;
-  const body = req.body;
+  try {
+    const { id } = req.params;
+    const body = req.body;
 
-  if (!body) {
-    return res.status(400).json({
+    if (!body) {
+      res.status(400).json({
+        success: false,
+        msg: `name and price of tour cannot be undefined!`,
+      });
+    }
+
+    const tour = await Tour.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: tour,
+    });
+  } catch (error) {
+    res.status(400).json({
       success: false,
-      msg: `name and price of tour cannot be undefined!`,
+      err: err,
     });
   }
 };
 
-module.exports.deleteTour = (req, res) => {
-  const { id } = req.params;
+module.exports.deleteTour = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const tour = await Tour.findByIdAndDelete(id);
 
-  res.status(201).json({
-    success: true,
-    data: newTour,
-  });
+    res.status(200).json({
+      success: true,
+      data: tour,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      msg: error,
+    });
+  }
 };
