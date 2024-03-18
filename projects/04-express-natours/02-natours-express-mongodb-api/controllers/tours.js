@@ -41,17 +41,7 @@ module.exports.getTour = async (req, res) => {
 // create tour
 module.exports.createTour = async (req, res) => {
   try {
-    const { name, price } = req.body;
-
-    if (!name || !price) {
-      res.status(400).json({
-        success: false,
-        msg: `name and price of tour cannot be undefined!`,
-      });
-    }
-
     const tour = await Tour.create(req.body);
-
     res.status(201).json({
       success: true,
       data: tour,
@@ -59,7 +49,7 @@ module.exports.createTour = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      msg: error.errmsg,
+      msg: error,
     });
   }
 };
@@ -68,15 +58,6 @@ module.exports.createTour = async (req, res) => {
 module.exports.updateTour = async (req, res) => {
   try {
     const { id } = req.params;
-    const body = req.body;
-
-    if (!body) {
-      res.status(400).json({
-        success: false,
-        msg: `name and price of tour cannot be undefined!`,
-      });
-    }
-
     const tour = await Tour.findByIdAndUpdate(id, req.body, {
       new: true,
       runValidators: true,
