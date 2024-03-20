@@ -1,5 +1,4 @@
 // read data from ../dev-data/data/tours-simple.json
-const path = require("path");
 const Tour = require("../models/tours");
 
 // get all tours

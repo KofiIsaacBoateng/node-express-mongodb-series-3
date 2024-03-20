@@ -12,7 +12,7 @@ const bulkToursData = JSON.parse(
 mongoose
   .connect(MONGO_URI)
   .then((con) => {
-    console.log("database connection successful");
+    console.log("database connection successful!");
   })
   .catch((error) => console.error("db connection error: ", error));
 
