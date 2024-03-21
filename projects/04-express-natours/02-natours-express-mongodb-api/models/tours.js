@@ -129,4 +129,30 @@ tourSchema.post(/^find/, function (docs, next) {
   next();
 });
 
+/***
+ * AGGREGATION MIDDLEWARE
+ *
+ * works on aggregation
+ */
+tourSchema.pre("aggregate", function (next) {
+  this.pipeline().unshift({
+    $match: {
+      isSecretTour: {
+        $ne: true,
+      },
+    },
+  });
+  this.start = Date.now();
+  next();
+});
+
+tourSchema.post("aggregate", function (docs, next) {
+  console.log(
+    "Aggregation took: ",
+    (Date.now() - this.start) / 1000,
+    " seconds"
+  );
+  next();
+});
+
 module.exports = model("Tour", tourSchema);
