@@ -11,6 +11,7 @@ const {
   getTop5Cheapest,
   getTop5Expensive,
   getStats,
+  monthlyPlan,
 } = require("../controllers/tours");
 
 /*** ALIASES */
@@ -19,7 +20,8 @@ router.get("/top-5-cheapest", top5, getTop5Cheapest, getAllTours);
 router.get("/top-5-expensive", top5, getTop5Expensive, getAllTours);
 
 /*** STATISTICS */
-router.route("/get-stats").get(getStats);
+router.get("/get-stats", getStats);
+router.get("/monthly-plan/:year", monthlyPlan);
 
 /*** MAIN ROUTES */
 router.route("/").get(getAllTours).post(createTour);

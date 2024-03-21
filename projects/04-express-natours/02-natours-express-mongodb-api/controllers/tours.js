@@ -3,6 +3,7 @@ const Tour = require("../models/tours");
 const API_FEATURES = require("../utils/api-features");
 
 /*** STATISTICS */
+// general starts based on difficulty levels
 module.exports.getStats = async (req, res) => {
   try {
     const stats = await Tour.aggregate([
@@ -46,7 +47,61 @@ module.exports.getStats = async (req, res) => {
   }
 };
 
-/*** GET ALL TOURS */
+// monthly preparation stats
+module.exports.monthlyPlan = async (req, res) => {
+  try {
+    const { year } = req.params; // 2021
+    const plan = await Tour.aggregate([
+      {
+        $unwind: "$startDates",
+      },
+
+      {
+        $match: {
+          startDates: {
+            $gte: new Date(`${year}-01-01`),
+            $lte: new Date(`${year}-12-31`),
+          },
+        },
+      },
+
+      {
+        $group: {
+          _id: { $month: "$startDates" },
+          numOfTours: { $sum: 1 },
+          tours: { $push: "$name" },
+        },
+      },
+      {
+        $sort: { numOfTours: -1 },
+      },
+      {
+        $addFields: {
+          month: "$_id",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      results: plan.length,
+      data: plan,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      msg: error,
+    });
+  }
+};
+
+/**** MAIN */
+/*** Get all tours */
 module.exports.getAllTours = async (req, res) => {
   try {
     let features = new API_FEATURES(Tour.find(), req.query)
@@ -70,7 +125,7 @@ module.exports.getAllTours = async (req, res) => {
   }
 };
 
-// get tour
+/*** Get tour */
 module.exports.getTour = async (req, res) => {
   try {
     const { id } = req.params;
@@ -95,7 +150,7 @@ module.exports.getTour = async (req, res) => {
   }
 };
 
-// create tour
+/*** Create tour */
 module.exports.createTour = async (req, res) => {
   try {
     const tour = await Tour.create(req.body);
@@ -111,7 +166,7 @@ module.exports.createTour = async (req, res) => {
   }
 };
 
-// update a tour
+/*** Update tour */
 module.exports.updateTour = async (req, res) => {
   try {
     const { id } = req.params;
@@ -141,6 +196,7 @@ module.exports.updateTour = async (req, res) => {
   }
 };
 
+/*** Delete tour */
 module.exports.deleteTour = async (req, res) => {
   try {
     const { id } = req.params;
@@ -168,7 +224,6 @@ module.exports.deleteTour = async (req, res) => {
 };
 
 /*** ALIASES */
-
 module.exports.top5 = (req, res, next) => {
   // top 5
   req.query.limit = 5;
