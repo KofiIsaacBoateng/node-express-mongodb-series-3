@@ -54,7 +54,7 @@ class API_FEATURES {
 
   pagination() {
     const page = this.queryObject.page || 1;
-    const limit = this.queryObject.limit || 5;
+    const limit = this.queryObject.limit || 20;
     const skip = (page - 1) * limit;
 
     /**NB::==> make sure to update error handling */

@@ -11,6 +11,11 @@ const tourSchema = new Schema(
 
     tourSlug: String,
 
+    isSecretTour: {
+      type: Boolean,
+      default: false,
+    },
+
     duration: {
       type: String,
       required: [true, "Please specify the tour duration"],
@@ -100,6 +105,27 @@ tourSchema.pre("save", function (next) {
 
 tourSchema.post("save", function (docs, next) {
   console.log("Tour slug created!\nOutput is: ", docs.tourSlug);
+  next();
+});
+
+/***
+ * QUERY MIDDLEWARE
+ *
+ * works on query methods and a few addition
+ *
+ */
+tourSchema.pre(/^find/, function (next) {
+  this.find({
+    isSecretTour: {
+      $ne: true,
+    },
+  });
+  this.start = Date.now();
+  next();
+});
+
+tourSchema.post(/^find/, function (docs, next) {
+  console.log("The query took: ", (Date.now() - this.start) / 1000, " seconds");
   next();
 });
 
