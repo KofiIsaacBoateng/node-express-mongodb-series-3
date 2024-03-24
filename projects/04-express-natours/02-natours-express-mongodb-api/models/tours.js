@@ -7,6 +7,11 @@ const tourSchema = new Schema(
     name: {
       type: String,
       required: [true, "Name field cannot be empty"],
+      trim: true,
+      unique: true,
+      minLength: [3, "Tour name must be at least 3 characters"],
+      maxLength: [50, "Tour name must not exceed 50 characters"],
+      // validate: [validator.isAlpha, "must contain alphabets only"], /** third party validator */
     },
 
     tourSlug: String,
@@ -45,6 +50,8 @@ const tourSchema = new Schema(
     ratingsAverage: {
       type: Number,
       default: 4.5,
+      min: [1, "Rating must be from 1 to 5"],
+      max: [5, "Rating mush be from 1 to 5"],
     },
 
     price: {
@@ -52,7 +59,18 @@ const tourSchema = new Schema(
       required: [true, "Price field cannot be empty"],
     },
 
-    priceDiscount: Number,
+    priceDiscount: {
+      type: Number,
+      default: 0,
+      validate: {
+        // validator will not work on any update method
+        validator: function (value) {
+          return value <= this.price;
+        },
+
+        message: "price discount must always be less than the product price",
+      },
+    },
 
     description: {
       type: String,
