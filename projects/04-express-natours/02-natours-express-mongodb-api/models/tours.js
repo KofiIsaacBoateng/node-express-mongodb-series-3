@@ -36,6 +36,7 @@ const tourSchema = new Schema(
 
     difficulty: {
       type: String,
+      required: [true, "Difficulty level is required!"],
       enum: {
         values: ["medium", "easy", "difficult"],
         message: "Difficulty: [{VALUE}] isn't supported",
@@ -90,16 +91,12 @@ const tourSchema = new Schema(
 
     images: [String],
 
-    createdAt: {
-      type: Date,
-      default: Date.now(),
-    },
-
     startDates: [Date],
   },
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    timestamps: true,
   }
 );
 
