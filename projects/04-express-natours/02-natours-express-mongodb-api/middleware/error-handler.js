@@ -1,43 +1,61 @@
 const { StatusCodes } = require("http-status-codes");
 const { CustomErrorAPI } = require("../errors");
 
-const handleDuplicateValuesError = (error) => {
+const handleDuplicateValuesErrorDB = (error) => {
   const keyValues = Object.entries(error.keyValue);
   const message = `Duplicate values detected! [${
     keyValues[0][0] + ": " + keyValues[0][1]
-  }] already exists!`;
+  }] already exists! Please enter another value.`;
 
   return new CustomErrorAPI(message);
 };
 
-const handleCastError = (error) => {
-  const message = `Invalid input => ${error.path}: ${error.value}`;
+const handleCastErrorDB = (error) => {
+  const message = `Invalid ${error.path}: ${error.value}`;
   return new CustomErrorAPI(message);
 };
 
-const handleValidationError = (error) => {
-  return new CustomErrorAPI(error.message);
+const handleValidationErrorDB = (error) => {
+  const message = Object.values(error.errors)
+    .map((err) => `[${err.message}]`)
+    .join(" !~~~~! ");
+  return new CustomErrorAPI(`${error._message} => ${message}`);
 };
 
 const sendDevelopment = (res, error) => {
-  res.status(error.statusCode).json({
-    success: false,
-    message: error.message,
-    error: error,
-    stack: error.stack,
-  });
+  if (error.isOperational) {
+    res.status(error.statusCode).json({
+      success: false,
+      message: error.message,
+      error: error,
+      stack: error.stack,
+    });
+  } else {
+    console.log("ERROR: Not operational error");
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Something went wrong. Please try again!",
+    });
+  }
 };
 
 const sendProduction = (res, error) => {
-  res.status(error.statusCode).json({
-    success: false,
-    message: error.message,
-  });
+  if (error.isOperational) {
+    res.status(error.statusCode).json({
+      success: false,
+      message: error.message,
+    });
+  } else {
+    console.log("ERROR: Not operational error");
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Something went wrong. Please try again!",
+    });
+  }
 };
 
 const errorHandler = (err, req, res, next) => {
   if (err instanceof CustomErrorAPI) {
-    console.log("came here");
     if (process.env.NODE_ENV === "production") {
       return sendProduction(res, err);
     } else if (process.env.NODE_ENV === "development") {
@@ -45,30 +63,14 @@ const errorHandler = (err, req, res, next) => {
     }
   }
 
-  const customError = {
-    statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-    message: "Something went wrong, please try again!",
-    error: err,
-    stack: err.stack,
+  let customError = {
+    ...err,
   };
-
-  if (err.code && err.code === 11000) {
-    const error = handleDuplicateValuesError(err, next);
-    customError.message = error.message;
-    customError.statusCode = error.statusCode;
-  }
-
-  if (err.name === "CastError") {
-    const error = handleCastError(err);
-    customError.message = error.message;
-    customError.statusCode = error.statusCode;
-  }
-
-  if (err.name === "ValidationError") {
-    const error = handleValidationError(err);
-    customError.message = error.message;
-    customError.statusCode = error.statusCode;
-  }
+  if (err.code && err.code === 11000)
+    customError = handleDuplicateValuesErrorDB(err, next);
+  if (err.name === "CastError") customError = handleCastErrorDB(err);
+  if (err.name === "ValidationError")
+    customError = handleValidationErrorDB(err);
 
   if (process.env.NODE_ENV === "production") {
     return sendProduction(res, customError);

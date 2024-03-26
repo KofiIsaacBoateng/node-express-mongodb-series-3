@@ -5,8 +5,8 @@ class CustomErrorAPI extends Error {
     super(message);
 
     this.statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
-
-    Error.captureStackTrace(this, this.stack);
+    this.isOperational = true;
+    Error.captureStackTrace(this, this.constructor);
   }
 }
 

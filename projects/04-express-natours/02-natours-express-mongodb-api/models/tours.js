@@ -1,6 +1,6 @@
 const { model, Schema, Types } = require("mongoose");
 const slugify = require("slugify");
-const validator = require("validator");
+// const validator = require("validator"); /*** third party validator */
 
 const tourSchema = new Schema(
   {
