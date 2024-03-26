@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "nodemon 02-natours-express-mongodb-api/server",
-    "start:prod": "node 02-natours-express-mongodb-api/server.js"
+    "start:prod": "nodemon 02-natours-express-mongodb-api/server.js"
   },
   "author": "",
   "license": "ISC",

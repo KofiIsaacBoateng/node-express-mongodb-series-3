@@ -4,7 +4,7 @@ class CustomErrorAPI extends Error {
   constructor(message) {
     super(message);
 
-    this.statusCode = StatusCodes.BAD_REQUEST;
+    this.statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
 
     Error.captureStackTrace(this, this.stack);
   }

@@ -47,7 +47,7 @@ module.exports.createTour = asyncWrapper(async (req, res) => {
     !req.body.duration ||
     !req.body.maxGroupSize ||
     !req.body.difficulty ||
-    req.body.imageCover
+    !req.body.imageCover
   ) {
     throw new BadRequestError(
       "name, price, duration, summary, difficulty, maxGroupSize, and imageCover fields cannot be empty"
