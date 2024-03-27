@@ -35,6 +35,7 @@ const sendDevelopment = (res, error) => {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Something went wrong. Please try again!",
+      error,
     });
   }
 };
@@ -50,6 +51,7 @@ const sendProduction = (res, error) => {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Something went wrong. Please try again!",
+      error,
     });
   }
 };
@@ -57,9 +59,9 @@ const sendProduction = (res, error) => {
 const errorHandler = (err, req, res, next) => {
   if (err instanceof CustomErrorAPI) {
     if (process.env.NODE_ENV === "production") {
-      return sendProduction(res, err);
+      sendProduction(res, err);
     } else if (process.env.NODE_ENV === "development") {
-      return sendDevelopment(res, err);
+      sendDevelopment(res, err);
     }
   }
 
@@ -71,11 +73,10 @@ const errorHandler = (err, req, res, next) => {
   if (err.name === "CastError") customError = handleCastErrorDB(err);
   if (err.name === "ValidationError")
     customError = handleValidationErrorDB(err);
-
   if (process.env.NODE_ENV === "production") {
-    return sendProduction(res, customError);
+    sendProduction(res, customError);
   } else if (process.env.NODE_ENV === "development") {
-    return sendDevelopment(res, customError);
+    sendDevelopment(res, customError);
   }
 };
 

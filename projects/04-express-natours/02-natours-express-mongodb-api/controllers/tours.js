@@ -41,7 +41,7 @@ module.exports.getTour = asyncWrapper(async (req, res) => {
 /*** Create tour */
 module.exports.createTour = asyncWrapper(async (req, res) => {
   if (
-    !re.body.name ||
+    !req.body.name ||
     !req.body.price ||
     !req.body.summary ||
     !req.body.duration ||
