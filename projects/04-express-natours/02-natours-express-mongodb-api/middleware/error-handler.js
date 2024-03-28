@@ -8,13 +8,19 @@ const handleDuplicateValuesErrorDB = (error) => {
     keyValues[0][0] + ": " + keyValues[0][1]
   }] already exists! Please enter another value.`;
 
-  return new CustomErrorAPI(message);
+  const newErr = new CustomErrorAPI(message);
+  newErr.statusCode = 400;
+
+  return newErr;
 };
 
 /**** same as above but for invalid type casting... eg. ObjectID (_id) not being of the right format */
 const handleCastErrorDB = (error) => {
   const message = `Invalid ${error.path}: ${error.value}`;
-  return new CustomErrorAPI(message);
+  const newErr = new CustomErrorAPI(message);
+  newErr.statusCode = 400;
+
+  return newErr;
 };
 
 /**** also same but for validation errors */
@@ -22,7 +28,11 @@ const handleValidationErrorDB = (error) => {
   const message = Object.values(error.errors)
     .map((err) => `[${err.message}]`)
     .join(" !~~~~! ");
-  return new CustomErrorAPI(`${error._message} => ${message}`);
+
+  const newErr = new CustomErrorAPI(`${error._message} => ${message}`);
+  newErr.statusCode = 400;
+
+  return newErr;
 };
 
 /*** ERROR response for development */
@@ -40,6 +50,7 @@ const sendDevelopment = (res, error) => {
       success: false,
       message: "Something went wrong. Please try again!",
       error,
+      stack: error.stack,
     });
   }
 };
