@@ -4,8 +4,8 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon 02-natours-express-mongodb-api/server",
-    "start:prod": "nodemon 02-natours-express-mongodb-api/server.js"
+    "start": "nodemon 03-natours-express-mongodb-authentication-and-authorization/server",
+    "start:prod": "nodemon 03-natours-express-mongodb-authentication-and-authorization/server"
   },
   "author": "",
   "license": "ISC",

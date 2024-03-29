@@ -13,6 +13,7 @@ const {
   getStats,
   monthlyPlan,
 } = require("../controllers/tours");
+const { routeProtector } = require("../controllers/auth");
 
 /*** ALIASES */
 router.get("/top-5-rated", top5, getTop5Rated, getAllTours);
@@ -26,6 +27,10 @@ router.get("/monthly-plan/:year", monthlyPlan);
 /*** MAIN ROUTES */
 router.route("/").get(getAllTours).post(createTour);
 
-router.route("/:id").get(getTour).patch(updateTour).delete(deleteTour);
+router
+  .route("/:id")
+  .get(getTour)
+  .patch(routeProtector, updateTour)
+  .delete(routeProtector, deleteTour);
 
 module.exports = router;

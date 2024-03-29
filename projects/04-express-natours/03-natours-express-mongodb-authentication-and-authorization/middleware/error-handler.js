@@ -8,13 +8,19 @@ const handleDuplicateValuesErrorDB = (error) => {
     keyValues[0][0] + ": " + keyValues[0][1]
   }] already exists! Please enter another value.`;
 
-  return new CustomErrorAPI(message);
+  const newErr = new CustomErrorAPI(message);
+  newErr.statusCode = 400;
+
+  return newErr;
 };
 
 /**** same as above but for invalid type casting... eg. ObjectID (_id) not being of the right format */
 const handleCastErrorDB = (error) => {
   const message = `Invalid ${error.path}: ${error.value}`;
-  return new CustomErrorAPI(message);
+  const newErr = new CustomErrorAPI(message);
+  newErr.statusCode = 400;
+
+  return newErr;
 };
 
 /**** also same but for validation errors */
@@ -22,43 +28,29 @@ const handleValidationErrorDB = (error) => {
   const message = Object.values(error.errors)
     .map((err) => `[${err.message}]`)
     .join(" !~~~~! ");
-  return new CustomErrorAPI(`${error._message} => ${message}`);
+
+  const newErr = new CustomErrorAPI(`${error._message} => ${message}`);
+  newErr.statusCode = 400;
+
+  return newErr;
 };
 
 /*** ERROR response for development */
 const sendDevelopment = (res, error) => {
-  if (error.isOperational) {
-    res.status(error.statusCode).json({
-      success: false,
-      message: error.message,
-      error: error,
-      stack: error.stack,
-    });
-  } else {
-    console.log("ERROR: Not operational error");
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: "Something went wrong. Please try again!",
-      error,
-    });
-  }
+  res.status(error.statusCode).json({
+    success: false,
+    message: error.message,
+    error: error,
+    stack: error.stack,
+  });
 };
 
 /**** ERROR response for production */
 const sendProduction = (res, error) => {
-  if (error.isOperational) {
-    res.status(error.statusCode).json({
-      success: false,
-      message: error.message,
-    });
-  } else {
-    console.log("ERROR: Not operational error");
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: "Something went wrong. Please try again!",
-      error,
-    });
-  }
+  res.status(error.statusCode).json({
+    success: false,
+    message: error.message,
+  });
 };
 
 /**** GLOBAL ERROR HANDLER */
@@ -78,16 +70,32 @@ const errorHandler = (err, req, res, next) => {
   };
   if (err.code && err.code === 11000)
     // duplicate values
-    customError = handleDuplicateValuesErrorDB(err, next);
+    customError = handleDuplicateValuesErrorDB(err);
   if (err.name === "CastError") customError = handleCastErrorDB(err); // cast error
   if (err.name === "ValidationError")
     // validation error
     customError = handleValidationErrorDB(err);
 
-  if (process.env.NODE_ENV === "production") {
-    sendProduction(res, customError);
-  } else if (process.env.NODE_ENV === "development") {
-    sendDevelopment(res, customError);
+  if (customError.isOperational) {
+    if (process.env.NODE_ENV === "production") {
+      sendProduction(res, customError);
+    } else if (process.env.NODE_ENV === "development") {
+      sendDevelopment(res, customError);
+    }
+  } else {
+    console.log("ERROR: Not operational error");
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Something went wrong. Please try again!",
+      error:
+        process.env.NODE_ENV === "development"
+          ? customError
+          : "error isn't available during production",
+      stack:
+        process.env.NODE_ENV === "development"
+          ? customError.stack
+          : "stack isn't available during production",
+    });
   }
 };
 

@@ -10,6 +10,7 @@ const errorHandler = require("./middleware/error-handler");
 const app = express();
 
 // routes
+const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/users");
 const tourRoutes = require("./routes/tours");
 
@@ -20,6 +21,7 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 /*** routes */
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/tours", tourRoutes);
+app.use("/api/v1/auth", authRoutes);
 
 /**** final middleware */
 app.use(errorHandler);
