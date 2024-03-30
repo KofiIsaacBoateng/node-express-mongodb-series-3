@@ -35,12 +35,7 @@ const signup = asyncWrapper(async (req, res) => {
   }
 
   /*** create user account */
-  const user = await User.create({
-    name,
-    email,
-    password,
-    passwordConfirm,
-  });
+  const user = await User.create(req.body);
 
   /***** token section */
   const token = registerToken(user);

@@ -19,7 +19,7 @@ const UserSchema = new mongoose.Schema({
     validate: [validator.isEmail, "Invalid email!"],
   },
 
-  roles: {
+  role: {
     type: String,
     required: true,
     enum: {
