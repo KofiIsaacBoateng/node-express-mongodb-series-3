@@ -35,6 +35,22 @@ const handleValidationErrorDB = (error) => {
   return newErr;
 };
 
+/*** jwt error */
+const handleJWTError = (error) => {
+  const newErr = new CustomErrorAPI(`${error.name}: Please login`);
+  newErr.statusCode = 401;
+
+  return newErr;
+};
+
+/**** jwt expired error */
+const handleJWTExpiredError = (error) => {
+  const newErr = new CustomErrorAPI(`${error.name}: Please login again!`);
+  newErr.statusCode = 401;
+
+  return newErr;
+};
+
 /*** ERROR response for development */
 const sendDevelopment = (res, error) => {
   res.status(error.statusCode).json({
@@ -68,13 +84,27 @@ const errorHandler = (err, req, res, next) => {
   let customError = {
     ...err,
   };
+
+  console.log("Error name: ", err.name);
+  // duplicate values
   if (err.code && err.code === 11000)
-    // duplicate values
     customError = handleDuplicateValuesErrorDB(err);
-  if (err.name === "CastError") customError = handleCastErrorDB(err); // cast error
+
+  // cast error
+  if (err.name === "CastError") customError = handleCastErrorDB(err);
+
+  // validation error
   if (err.name === "ValidationError")
-    // validation error
     customError = handleValidationErrorDB(err);
+
+  // jwt token error
+  if (err.name === "JsonWebTokenError") {
+    customError = handleJWTError(err);
+  }
+  // jwt expired error
+  if (err.name === "TokenExpiredError") {
+    customError = handleJWTExpiredError(err);
+  }
 
   if (customError.isOperational) {
     if (process.env.NODE_ENV === "production") {

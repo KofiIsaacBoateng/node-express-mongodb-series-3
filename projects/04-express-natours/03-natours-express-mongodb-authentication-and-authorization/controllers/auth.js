@@ -89,9 +89,8 @@ const login = asyncWrapper(async (req, res) => {
 });
 
 /**** route protector => middleware  */
-const routeProtector = async (req, res, next) => {
+const routeProtector = asyncWrapper(async (req, res, next) => {
   const { authorization } = req.headers;
-  console.log("authorization: ", authorization);
 
   /** verify if token format */
   if (!authorization || !authorization.startsWith("Bearer")) {
@@ -109,8 +108,6 @@ const routeProtector = async (req, res, next) => {
     );
   }
 
-  console.log(decoded);
-
   const user = await User.findById({ _id: decoded.id });
 
   if (!user) {
@@ -120,10 +117,18 @@ const routeProtector = async (req, res, next) => {
   }
 
   const changedPasswordAfterToken = user.changedPasswordAfterToken(decoded.iat);
-  console.log(changedPasswordAfterToken);
+
+  if (changedPasswordAfterToken) {
+    throw new UnAuthorizedError(
+      "You changed password recently! Please login again!"
+    );
+  }
+
+  /**** give access to user data */
+  req.user = user;
 
   next();
-};
+});
 
 /*** exports */
 module.exports = {

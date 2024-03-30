@@ -1,6 +1,6 @@
 require("dotenv").config();
 const app = require("./app");
-const { connect, Schema, model } = require("mongoose");
+const mongoose = require("mongoose");
 const PORT = process.env.PORT || 3500;
 
 /*** uncaught exceptions */
@@ -12,9 +12,9 @@ process.on("uncaughtException", (error) => {
 
 let server;
 
-connect(process.env.MONGO_URI_LOCAL).then((data) =>
-  console.log("Database connection successful!")
-);
+mongoose
+  .connect(process.env.MONGO_URI_LOCAL)
+  .then((data) => console.log("Database connection successful!"));
 server = app.listen(PORT, () =>
   console.log(`Server is listening on PORT: ${PORT}`)
 );
