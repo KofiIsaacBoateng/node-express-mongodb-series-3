@@ -1,5 +1,9 @@
 const { StatusCodes } = require("http-status-codes");
-const { BadRequestError, UnAuthorizedError } = require("../errors");
+const {
+  BadRequestError,
+  UnAuthorizedError,
+  CustomErrorAPI,
+} = require("../errors");
 const asyncWrapper = require("../utils/asyncWrapper");
 const { promisify } = require("util");
 const jwt = require("jsonwebtoken");
@@ -130,9 +134,26 @@ const routeProtector = asyncWrapper(async (req, res, next) => {
   next();
 });
 
+/**** role restrictions */
+const roleRestriction = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      const error = new CustomErrorAPI(
+        "Unauthorized request! You are not allowed to perform this activity!"
+      );
+      error.statusCode = StatusCodes.FORBIDDEN;
+
+      next(error);
+    }
+
+    next();
+  };
+};
+
 /*** exports */
 module.exports = {
   signup,
   login,
   routeProtector,
+  roleRestriction,
 };

@@ -13,7 +13,7 @@ const {
   getStats,
   monthlyPlan,
 } = require("../controllers/tours");
-const { routeProtector } = require("../controllers/auth");
+const { routeProtector, roleRestriction } = require("../controllers/auth");
 
 /*** ALIASES */
 router.get("/top-5-rated", top5, getTop5Rated, getAllTours);
@@ -30,7 +30,7 @@ router.route("/").get(getAllTours).post(createTour);
 router
   .route("/:id")
   .get(getTour)
-  .patch(routeProtector, updateTour)
-  .delete(routeProtector, deleteTour);
+  .patch(routeProtector, roleRestriction("lead-guide", "admin"), updateTour)
+  .delete(routeProtector, roleRestriction("admin"), deleteTour);
 
 module.exports = router;
