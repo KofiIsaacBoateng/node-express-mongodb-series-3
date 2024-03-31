@@ -17,56 +17,56 @@ const registerToken = (user) => {
   });
 };
 
-const signup = asyncWrapper(async (req, res) => {
-  const { name, email, password, passwordConfirm } = req.body;
-
-  /*** verify if inputs */
-  if (!name || !email || !password || !passwordConfirm) {
-    throw new BadRequestError(
-      "name, email, password, or password confirm is missing"
-    );
-  }
-
-  const exists = await User.findOne({ email });
-
-  /**** verify if user already exists */
-  if (exists) {
-    throw new BadRequestError(
-      `User with email: ${email} already exists. Please login if this is you`
-    );
-  }
-
-  /*** create user account */
-  const user = await User.create(req.body);
-
-  /***** token section */
+const sendLoginCredentials = (user, res, statusCode) => {
+  /***** gen token */
   const token = registerToken(user);
 
   /*** get rid of password in response */
   user.password = undefined;
 
   /*** response */
-  res.status(StatusCodes.OK).json({
+  res.status(statusCode).json({
     success: true,
     token,
     data: user,
   });
+};
+
+/**** sign up */
+const signup = asyncWrapper(async (req, res) => {
+  const { name, email, password, passwordConfirm } = req.body;
+  /*** verify if inputs */
+  if (!name || !email || !password || !passwordConfirm) {
+    throw new BadRequestError(
+      "name, email, password, or password confirm is missing"
+    );
+  }
+  const exists = await User.findOne({ email });
+  /**** verify if user already exists */
+  if (exists) {
+    throw new BadRequestError(
+      `User with email: ${email} already exists. Please login if this is you`
+    );
+  }
+  /*** create user account */
+  const user = await User.create(req.body);
+  /**** send login credentials */
+  sendLoginCredentials(user, res, StatusCodes.CREATED);
 });
 
+/*** login */
 const login = asyncWrapper(async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
     throw new BadRequestError("Please provide your email and password!");
   }
-
   /*** verify email and password */
   const exists = await User.findOne({ email }).select("+password");
   console.log(exists);
   if (!exists) {
     throw new BadRequestError("Invalid email or password");
   }
-
   const passwordVerified = await exists.verifyPassword(
     password,
     exists.password
@@ -74,60 +74,39 @@ const login = asyncWrapper(async (req, res) => {
   if (!passwordVerified) {
     throw new BadRequestError("Invalid email or password");
   }
-
-  /***** token section */
-  const token = registerToken(exists);
-
-  /**** get rid of password */
-  exists.password = undefined;
-
-  /**** response */
-  res.status(StatusCodes.OK).json({
-    success: true,
-    token,
-    data: exists,
-  });
+  /**** send login credentials */
+  sendLoginCredentials(exists, res, StatusCodes.OK);
 });
 
 /**** route protector => middleware  */
 const routeProtector = asyncWrapper(async (req, res, next) => {
   const { authorization } = req.headers;
-
   /** verify if token format */
   if (!authorization || !authorization.startsWith("Bearer")) {
     throw new UnAuthorizedError("Unauthorized request! Please login.");
   }
-
   const token = authorization.split(" ")[1];
-
   /**** verify token and decode it */
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-
   if (!decoded) {
     throw new UnAuthorizedError(
       "Unauthorized request! Token provide is invalid please login"
     );
   }
-
   const user = await User.findById({ _id: decoded.id });
-
   if (!user) {
     throw new UnAuthorizedError(
       "User doesn't exist anymore. Please login or signup to have access"
     );
   }
-
   const changedPasswordAfterToken = user.changedPasswordAfterToken(decoded.iat);
-
   if (changedPasswordAfterToken) {
     throw new UnAuthorizedError(
       "You changed password recently! Please login again!"
     );
   }
-
   /**** give access to user data */
   req.user = user;
-
   next();
 });
 
@@ -206,18 +185,38 @@ const resetPassword = asyncWrapper(async (req, res, next) => {
 
   await user.save();
 
-  /***** token section */
-  const loginToken = registerToken(user);
+  /**** send login credentials */
+  sendLoginCredentials(user, res, StatusCodes.OK);
+});
 
-  /**** get rid of password */
-  user.password = undefined;
+const updatePassword = asyncWrapper(async (req, res) => {
+  const { user: _id } = req;
+  const { currentPassword, newPassword, newPasswordConfirm } = req.body;
 
-  /**** response */
-  res.status(StatusCodes.OK).json({
-    success: true,
-    token: loginToken,
-    data: user,
-  });
+  if (!currentPassword || !newPassword || !newPasswordConfirm) {
+    throw new BadRequestError(
+      "Please provide all required fields; Current password, new password, confirm new password."
+    );
+  }
+
+  const user = await User.findById(_id).select("+password");
+  const verifiedPassword = await user.verifyPassword(
+    currentPassword,
+    user.password
+  );
+  console.log("verifiedPassword: ", verifiedPassword);
+
+  if (!verifiedPassword) {
+    throw new UnAuthorizedError("Invalid Password! Please try again");
+  }
+
+  user.password = newPassword;
+  user.passwordConfirm = newPasswordConfirm;
+
+  await user.save();
+
+  /**** send login credentials */
+  sendLoginCredentials(user, res, StatusCodes.OK);
 });
 
 /*** exports */
@@ -228,4 +227,5 @@ module.exports = {
   roleRestriction,
   forgotPassword,
   resetPassword,
+  updatePassword,
 };

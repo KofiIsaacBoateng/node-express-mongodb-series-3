@@ -7,6 +7,10 @@ const {
   updateUser,
   deleteUser,
 } = require("../controllers/users");
+const { routeProtector, updatePassword } = require("../controllers/auth");
+
+// update password
+router.route("/update-password").post(routeProtector, updatePassword);
 
 router.route("/").get(getAllUsers).post(createUser);
 
